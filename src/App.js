@@ -16,6 +16,7 @@ import {addPostThunk, loadPostThunk} from "./shared/postSlice"
 import NewPost from "./NewPost";
 import { Suspense } from "react";
 import Spinner from "./Spinner";
+import Detail from "./Detail";
 
 function App() {
   const [isLogin, setIsLogin] = useState(false);
@@ -76,7 +77,7 @@ function App() {
                     <Button onClick={() => navigate("/sign_in")}>로그인</Button>
                   )}
                   {isLogin && <Button onClick={logout}>로그아웃</Button>}
-                  {isLogin && <Button onClick={addpost}>포스트</Button>}
+                  {isLogin && <Button onClick={addpost}>글쓰기</Button>}
                 </ButtonGroup>
               )}
             </Toolbar>
@@ -88,6 +89,7 @@ function App() {
           <Route path="/sign_up" element={<SignUp />} />
           <Route path="/sign_in" element={<SignIn />} />
           <Route path="/newpost" element={<NewPost />}/>
+          <Route path="/detail/:pid" element={<Detail />}/>
         </Routes>
         {/* </Suspense> */}
       </ThemeProvider>

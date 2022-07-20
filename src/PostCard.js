@@ -16,9 +16,11 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import moment, { format } from "moment";
 import "moment/locale/ko";
+import { useNavigate } from "react-router-dom";
 
 const PostCard = (props) => {
   const time = props.post.createdAt.toDate();
+  const navigate = useNavigate()
   moment.locale("ko");
   const formattedTime = moment(time).locale("ko-kr").format("lll");
   const image_url = 
@@ -28,7 +30,7 @@ const PostCard = (props) => {
   
   console.log(formattedTime);
   return (
-    <Card sx={{ marginBottom: "3em" }}>
+    <Card sx={{ marginBottom: "3em" }} onClick={() => navigate("/detail/" + props.pid)}>
       <CardHeader
         avatar={
           <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
