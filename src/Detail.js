@@ -13,8 +13,11 @@ import { useSelector } from "react-redux";
 import { auth } from "./shared/firebase";
 import { useDispatch } from "react-redux";
 import { deletePostThunk } from "./shared/postSlice";
+import moment from "moment";
+import "moment/locale/ko";
 
 const Detail = (props) => {
+    
   const params = useParams();
   const navigate = useNavigate()
   const dispatch = useDispatch();
@@ -36,6 +39,12 @@ const Detail = (props) => {
     ? one_post.imageUrl
     : "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Noimage.svg/1479px-Noimage.svg.png";
 
+
+    const time = one_post.createdAt.toDate();
+  moment.locale("ko");
+  const formattedTime = moment(time).locale("ko-kr").format("lll");
+
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", my: 5 }}>
       <Container sx={{display: "flex", flexDirection: "row" }}>
@@ -45,11 +54,14 @@ const Detail = (props) => {
           <Avatar sx={{ bgcolor: "#222", mr: 2 }} aria-label="recipe">
             M
           </Avatar>
+          <div>
           <Typography>{one_post.uid}</Typography>
+          <Typography variant="body2" color="#777">{formattedTime}</Typography>
+          </div>
         </Container>
         
       </Container>
-      <Container sx={{mb: 2}}>
+      <Container sx={{my: 5}}>
         <Box
           sx={{
             display: "flex",
@@ -97,7 +109,7 @@ const Detail = (props) => {
 
       {auth.currentUser.email == one_post.uid && <Container sx={{ display: "flex", justifyContent: "flex-end" }}>
           <ButtonGroup variant="contained">
-            <Button>수정</Button>
+            <Button onClick={() => navigate("/update/"+params.pid)}>수정</Button>
             <Button onClick={deletePost}>삭제</Button>
           </ButtonGroup>
         </Container>}

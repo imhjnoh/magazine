@@ -1,6 +1,6 @@
 import { async } from "@firebase/util"
 import {createSlice, createAsyncThunk} from "@reduxjs/toolkit"
-import {collection, getDocs, addDoc, Timestamp, query, orderBy, limit, doc, deleteDoc} from "firebase/firestore"
+import {collection, getDocs, addDoc, Timestamp, query, orderBy, limit, doc, deleteDoc, updateDoc} from "firebase/firestore"
 import { db, auth } from "./firebase"
 
 export const addPostThunk = createAsyncThunk(
@@ -30,6 +30,14 @@ export const loadPostThunk = createAsyncThunk(
 //         const docs = 
 //     }
 // )
+export const updatePostThunk = createAsyncThunk(
+    'post/update',
+    async ({id, data}) => {
+        const docRef = doc(db, "posts", id)
+        await updateDoc(docRef, data)
+        return [id, data]
+    }
+)
 export const deletePostThunk = createAsyncThunk(
     'post/delete',
     async (id) => {
@@ -53,6 +61,10 @@ const postSlice = createSlice({
         builder.addCase(loadPostThunk.fulfilled, (state, action) => {
             console.log(action.payload);
             state.posts = action.payload
+        })
+        builder.addCase(updatePostThunk.fulfilled, (state, action) => {
+            const idx = state.posts.findIndex(x => x[0] == action.payload[0])
+            state.posts[idx][1] = {...state.posts[idx][1], ...action.payload[1]}
         })
         builder.addCase(deletePostThunk.fulfilled, (state, action) => {
             const idx = state.posts.findIndex(x => x[0] == action.payload)

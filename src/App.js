@@ -17,6 +17,7 @@ import NewPost from "./NewPost";
 import { Suspense } from "react";
 import Spinner from "./Spinner";
 import Detail from "./Detail";
+import UpdatePost from "./UpdatePost"
 
 function App() {
   const [isLogin, setIsLogin] = useState(false);
@@ -90,6 +91,7 @@ function App() {
           <Route path="/sign_in" element={<SignIn />} />
           <Route path="/newpost" element={<NewPost />}/>
           <Route path="/detail/:pid" element={<Detail />}/>
+          <Route path="/update/:pid" element={<UpdatePost />}/>
         </Routes>
         {/* </Suspense> */}
       </ThemeProvider>
