@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -17,36 +17,48 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import moment, { format } from "moment";
 import "moment/locale/ko";
 import { useNavigate } from "react-router-dom";
+import { MoominIcon } from "./Styles";
+import { getDocs, query, collection, where } from "firebase/firestore";
+import { db } from "./shared/firebase";
 
 const PostCard = (props) => {
-  const time = props.post.createdAt.toDate();
   const navigate = useNavigate()
-  moment.locale("ko");
-  const formattedTime = moment(time).locale("ko-kr").format("lll");
   const image_url = 
     props.post.imageUrl
       ? props.post.imageUrl
       : "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Noimage.svg/1479px-Noimage.svg.png"
-  
-  console.log(formattedTime);
+  const [usrName, setUsrName] = React.useState("")
+
+  useEffect(() => {
+    async function fetchData() {
+    const user_docs = await getDocs(query(
+      collection(db, "users"), where("user_id","==",props.post.uid)
+      ))
+      const userdata = []
+      user_docs.forEach(x => userdata.push(x.data()))
+      setUsrName(userdata[0]?.name)
+    }
+    fetchData()
+  }, [])
+
   return (
-    <Card sx={{ marginBottom: "3em" }} onClick={() => navigate("/detail/" + props.pid)}>
+    <Card sx={{ marginBottom: "3em" }}>
       <CardHeader
         avatar={
-          <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+          <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe" src={MoominIcon}>
             R
           </Avatar>
         }
-        action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
-          </IconButton>
-        }
-        title={props.post.uid}
-        subheader={formattedTime}
+        // action={
+        //   <IconButton aria-label="settings">
+        //     <MoreVertIcon />
+        //   </IconButton>
+        // }
+        title={`${usrName} ` + props.post.uid}
+        subheader={props.post.createdAt}
         sx={{ borderBottom: "1px solid #eee" }}
       />
-      <Box sx={{ display: "flex", flexDirection: props.post.type == 2 ? "column" : "row" }}>
+      <Box sx={{ display: "flex", flexDirection: props.post.type == 2 ? "column" : "row", mb: 3 }} onClick={() => navigate("/detail/" + props.pid)}>
       {(!props.post.type || props.post.type == 0) && <CardMedia
           component="img"
           sx={{
@@ -61,7 +73,7 @@ const PostCard = (props) => {
           alt="Live from space album cover"
         />}
         <CardContent sx={{ flexGrow: 1, width: "100%" }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{whiteSpace: "pre"}}>
             {props.post.text}
           </Typography>
           
@@ -80,11 +92,11 @@ const PostCard = (props) => {
       />}
       
       </Box>
-      <CardActions disableSpacing sx={{ borderTop: "1px solid #eee" }}>
+      {/* <CardActions disableSpacing sx={{ borderTop: "1px solid #eee" }}>
         <IconButton aria-label="add to favorites">
           <FavoriteIcon />{props.post.likes}
         </IconButton>
-      </CardActions>
+      </CardActions> */}
     </Card>
   );
 };

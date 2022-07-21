@@ -10,14 +10,17 @@ import {
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { auth } from "./shared/firebase";
+import { auth, db } from "./shared/firebase";
+import { getDocs, query, collection, where } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { deletePostThunk } from "./shared/postSlice";
+import { MoominIcon } from "./Styles";
 import moment from "moment";
 import "moment/locale/ko";
 
 const Detail = (props) => {
     
+  const [usrName, setUsrName] = React.useState("")
   const params = useParams();
   const navigate = useNavigate()
   const dispatch = useDispatch();
@@ -33,16 +36,29 @@ const Detail = (props) => {
     }
   }
 
-  const one_post = post[0][1]
+  const one_post = post[0] ? post[0][1] : null
   console.log(post);
-  const image_url = one_post.imageUrl
-    ? one_post.imageUrl
+  const image_url = one_post?.imageUrl
+    ? one_post?.imageUrl
     : "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Noimage.svg/1479px-Noimage.svg.png";
 
 
-    const time = one_post.createdAt.toDate();
+    const time = one_post?.createdAt;
   moment.locale("ko");
-  const formattedTime = moment(time).locale("ko-kr").format("lll");
+//   const formattedTime = moment(time).locale("ko-kr").format("lll");
+const formattedTime = time
+
+React.useEffect(() => {
+    async function fetchData() {
+    const user_docs = await getDocs(query(
+      collection(db, "users"), where("user_id","==",one_post?.uid)
+      ))
+      const userdata = []
+      user_docs.forEach(x => userdata.push(x.data()))
+      setUsrName(userdata[0]?.name)
+    }
+    fetchData()
+  }, [one_post])
 
 
   return (
@@ -51,11 +67,11 @@ const Detail = (props) => {
         <Container
           sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}
         >
-          <Avatar sx={{ bgcolor: "#222", mr: 2 }} aria-label="recipe">
+          <Avatar sx={{ bgcolor: "#222", mr: 2 }} aria-label="recipe" src={MoominIcon}>
             M
           </Avatar>
           <div>
-          <Typography>{one_post.uid}</Typography>
+          <Typography><strong>{usrName}</strong> {one_post?.uid}</Typography>
           <Typography variant="body2" color="#777">{formattedTime}</Typography>
           </div>
         </Container>
@@ -65,10 +81,10 @@ const Detail = (props) => {
         <Box
           sx={{
             display: "flex",
-            flexDirection: one_post.type == 2 ? "column" : "row",
+            flexDirection: one_post?.type == 2 ? "column" : "row",
           }}
         >
-          {(!one_post.type || one_post.type == 0) && (
+          {(!one_post?.type || one_post?.type == 0) && (
             <CardMedia
               component="img"
               sx={{
@@ -84,11 +100,11 @@ const Detail = (props) => {
             />
           )}
           <Container sx={{ flexGrow: 1, width: "100%", my: 5 }}>
-            <Typography variant="body1" color="text.secondary">
-              {one_post.text}
+            <Typography variant="body1" color="text.secondary" sx={{whiteSpace: "pre"}}>
+              {one_post?.text}
             </Typography>
           </Container>
-          {one_post.type == 2 && (
+          {one_post?.type == 2 && (
             <CardMedia
               component="img"
               // sx={{ width: '100%', flexGrow: 1 }}
@@ -96,7 +112,7 @@ const Detail = (props) => {
               alt="Live from space album cover"
             />
           )}
-          {one_post.type == 1 && (
+          {one_post?.type == 1 && (
             <CardMedia
               component="img"
               sx={{ width: "100%", maxWidth: "50%", flexGrow: 1 }}
@@ -107,7 +123,7 @@ const Detail = (props) => {
         </Box>
       </Container>
 
-      {auth.currentUser.email == one_post.uid && <Container sx={{ display: "flex", justifyContent: "flex-end" }}>
+      {auth.currentUser?.email == one_post?.uid && <Container sx={{ display: "flex", justifyContent: "flex-end" }}>
           <ButtonGroup variant="contained">
             <Button onClick={() => navigate("/update/"+params.pid)}>수정</Button>
             <Button onClick={deletePost}>삭제</Button>

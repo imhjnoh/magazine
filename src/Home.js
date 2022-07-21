@@ -32,7 +32,7 @@ const Home = (props) => {
       <Box sx={{ bgcolor: "transparent" }}>
         {loading && <Spinner />}
         <Container maxWidth="md" sx={{ padding: "2em" }}>
-            {posts && posts.map(post => <PostCard pid={post[0]} post={post[1]}/>)}
+            {posts && posts.map(post => <PostCard key={post[0]} pid={post[0]} post={post[1]}/>)}
         </Container>
       </Box>
     </>

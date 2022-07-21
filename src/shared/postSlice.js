@@ -2,12 +2,19 @@ import { async } from "@firebase/util"
 import {createSlice, createAsyncThunk} from "@reduxjs/toolkit"
 import {collection, getDocs, addDoc, Timestamp, query, orderBy, limit, doc, deleteDoc, updateDoc} from "firebase/firestore"
 import { db, auth } from "./firebase"
+import moment from "moment"
+import "moment/locale/ko";
+
 
 export const addPostThunk = createAsyncThunk(
     'post/create',
     async(post) => {
         const doc = await addDoc(collection(db, "posts"), {...post})
-        const res = [doc.id, {...post}]
+        const tmp = {...post}
+        let time = tmp['createdAt'].toDate()
+        time = moment(time).locale("ko-kr").format("lll");
+        tmp['createdAt'] = time
+        const res = [doc.id, {...tmp}]
         console.log(res);
         return res
     }
@@ -19,7 +26,13 @@ export const loadPostThunk = createAsyncThunk(
         console.log(docs)
         let res = []
         docs.forEach((x) => {
-            res.push([x.id, x.data()])
+            const tmp = x.data()
+            let time = tmp['createdAt'].toDate()
+            time = moment(time).locale("ko-kr").format("lll");
+            tmp['createdAt'] = time
+
+            console.log(tmp)
+            res.push([x.id, tmp])
         })
         return res
     }

@@ -7,7 +7,7 @@ import { collection, getDocs, where, query } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import Spinner from "./Spinner";
 import {useDispatch} from "react-redux"
-import { loginThunk } from "./shared/slice";
+import { loadUserThunk, loginThunk } from "./shared/userSlice";
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -17,17 +17,19 @@ const SignIn = () => {
   const dispatch = useDispatch()
 
   const signin = async () => {
-    // dispatch(loginThunk(input_email.current.value, input_pw.current.value))
     setLoading(true)
-    const user = await signInWithEmailAndPassword(auth, input_email.current.value, input_pw.current.value)
-    // console.log(user);
-    // const user_docs = await getDocs(query(
-    //     collection(db, "users"), where("user_id","==",user.user.email)
-    // ))
-    // console.log(user_docs);
+    try{
+    await signInWithEmailAndPassword(auth, input_email.current.value, input_pw.current.value)
+    dispatch(loadUserThunk(auth.currentUser))
     alert("로그인 성공!")
     setLoading(false)
-    navigate("/")
+    navigate("/")}
+    catch(e) {
+      console.log(e)
+      alert("로그인 실패. 아이디와 비밀번호를 확인하세요")
+      setLoading(false)
+    }
+    
   }
 
   return (

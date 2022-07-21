@@ -1,29 +1,28 @@
-import logo from "./logo.svg";
-import "./App.css";
-import { useState, useEffect } from "react";
+import { Avatar, Box, Button, ButtonGroup, Toolbar, Typography } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import { Toolbar, Box, ButtonGroup, Button } from "@mui/material";
-import { theme, Header, Logo } from "./Styles";
-import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
-import Home from "./Home";
-import SignUp from "./SignUp";
-import SignIn from "./SignIn";
-import { auth } from "./shared/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-
-import {useDispatch} from "react-redux"
-import {addPostThunk, loadPostThunk} from "./shared/postSlice"
-import NewPost from "./NewPost";
-import { Suspense } from "react";
-import Spinner from "./Spinner";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import "./App.css";
 import Detail from "./Detail";
-import UpdatePost from "./UpdatePost"
+import Home from "./Home";
+import NewPost from "./NewPost";
+import { auth } from "./shared/firebase";
+import { loadPostThunk } from "./shared/postSlice";
+import { loadUserThunk } from "./shared/userSlice";
+import SignIn from "./SignIn";
+import SignUp from "./SignUp";
+import { Header, Logo, MoominIcon, theme } from "./Styles";
+import UpdatePost from "./UpdatePost";
 
 function App() {
   const [isLogin, setIsLogin] = useState(false);
   const dispatch = useDispatch()
   const navigate = useNavigate();
   const location = useLocation();
+  const userSelect = useSelector(state => state.user.user)
+  const user = React.useMemo(() => userSelect ? userSelect[0] : null, [userSelect])
   const loginCheck = async (user) => {
     if (user) {
       setIsLogin(true);
@@ -38,18 +37,21 @@ function App() {
     });
   };
   const addpost = () => {
-    // const post = {"text": "우앵", "uid": auth.currentUser.email, "likes": 0}
-    // dispatch(addPostThunk({...post}))
     navigate("/newpost")
   }
-  console.log(auth.currentUser);
+  console.log(user);
   useEffect(() => {
     console.log(location.pathname);
-    onAuthStateChanged(auth, loginCheck);
+    console.log(onAuthStateChanged(auth, loginCheck));
+    dispatch(loadUserThunk(auth.currentUser));
   }, []);
   useEffect(() => {
-    dispatch(loadPostThunk())
+    dispatch(loadPostThunk());
+    console.log(user);
   }, [])
+  useEffect(() => {
+    dispatch(loadUserThunk(auth.currentUser));
+  },[])
   return (
     <div className="App">
       <ThemeProvider theme={theme}>
@@ -64,6 +66,10 @@ function App() {
               <Logo onClick={() => navigate("/")}/>
 
               <Box sx={{ flexGrow: 1 }} />
+              {isLogin && <Avatar src={ user?.profileSrc ?  user?.profileSrc: MoominIcon}></Avatar>}
+              {isLogin && <Typography sx={{mx: 2}}>{user?.name}님, 환영합니다!</Typography>}
+
+
               {true && (
                 <ButtonGroup
                   variant="contained"
